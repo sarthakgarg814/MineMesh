@@ -1,3 +1,5 @@
+Project Video Link: https://drive.google.com/file/d/17mq8RaihjfYS1HJTZz7SoeoIdPGilokk/view?usp=sharing
+
 # MineMesh
 
 **MineMesh** is an underground mine-worker safety system built around two ESP32-C3 firmwares that share a single JSON protocol. A wearable **worker** device senses motion, battery, and emergency inputs, then sends compact Protocol v1 packets over **ESP-NOW**. A nearby **gateway** receives those packets, shows live status on a local web page, and can optionally bridge the **exact same JSON** onto MQTT for systems outside the mine.
