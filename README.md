@@ -8,6 +8,8 @@ This repository contains the hardware firmwares and the shared protocol. It is t
 
 Timers, peer MAC/channel, gateway mode, MQTT broker/topic, device identity, and mesh hop fields (`ttl` / `hop_count`) are **configurable**, so the same firmware pair can be retuned for different shaft layouts and used as a building block when planning larger mesh deployments.
 
+Agent chat history for the worker and gateway builds — including completed **task-list screenshots** and session release zips — is archived in [`Chats/`](./Chats/). See [Agent chat history & task lists](#agent-chat-history--task-lists-chats).
+
 ### High-level architecture
 
 ```mermaid
@@ -77,6 +79,7 @@ MineMesh is intentionally built from low-cost, commodity parts and radio modes t
 my_firmware/
 ├── PROTOCOL.md          # Shared MineMesh Protocol v1 (source of truth for packets)
 ├── README.md
+├── Chats/               # Agent chat artifacts + task-list screenshots
 ├── docs/screenshots/    # Gateway dashboard UI captures
 ├── worker/              # Firmware 1 — end-device / wearable
 │   └── firmware/        # App logic, pins, ESP-NOW TX, sensors
@@ -547,11 +550,60 @@ Possible later additions (not claimed as implemented here):
 
 ---
 
+## Agent chat history & task lists (`Chats/`)
+
+This repo keeps the **AI agent chat / build session artifacts** used while developing the two firmwares. They live under [`Chats/`](./Chats/) so judges and collaborators can see *how* the worker and gateway were planned and completed, not only the final source tree.
+
+### What’s in the folder
+
+| File | What it is |
+|---|---|
+| [`Chats/TaskList_Chat_Worker.png`](./Chats/TaskList_Chat_Worker.png) | Screenshot of the completed **worker** agent task list (4/4 · 100%) |
+| [`Chats/Tasklist_Chat_Gateway.png`](./Chats/Tasklist_Chat_Gateway.png) | Screenshot of the completed **gateway** agent task list (5/5 · 100%) |
+| [`Chats/worker_chat_release.zip`](./Chats/worker_chat_release.zip) | Release package produced from the worker agent session (flashable binaries + flash scripts) |
+| [`Chats/gatwey_chat_release.zip`](./Chats/gatwey_chat_release.zip) | Release package associated with the gateway agent session |
+
+Use the task-list screenshots as a quick map of agent milestones. Use the zips if you want the flashable outputs from those chat sessions without rebuilding from source (prefer rebuilding from `worker/` / `gateway/` for the latest code).
+
+### Worker agent task list
+
+Completed worker-session milestones captured in the screenshot:
+
+1. Scaffold worker project and inspect generated layout / build configuration  
+2. Ground ESP-IDF examples and public APIs for I2C, LED strip, ADC, and ESP-NOW  
+3. Implement worker configuration, sensor abstraction, peripherals, protocol, transport, safety state machine, CLI, and scheduling  
+4. Add README and shared MineMesh Protocol v1 documentation  
+
+![Worker agent task list](Chats/TaskList_Chat_Worker.png)
+
+### Gateway agent task list
+
+Completed gateway-session milestones captured in the screenshot (protocol compacting + end-to-end verify):
+
+1. Remove `countdown_sec` from the compact `FALL_ALERT` contract and generated worker payload  
+2. Update gateway validation and alert extraction for compact `FALL_ALERT` while tolerating legacy `countdown_sec`  
+3. Update `PROTOCOL.md` and gateway / worker documentation  
+4. Build and syntax-check worker and gateway; verify `FALL_ALERT` size under 250 bytes  
+5. Flash worker and gateway and monitor end-to-end critical alert delivery  
+
+![Gateway agent task list](Chats/Tasklist_Chat_Gateway.png)
+
+### Why this is included
+
+- Traceability for the hackathon: agent task progress is visible next to the firmware that shipped  
+- Separates **worker chat track** vs **gateway chat track** (two firmwares, two task lists)  
+- Keeps release zips from those sessions alongside the screenshots for demos or re-flashing  
+
+Source of truth for behavior remains the firmware trees (`worker/`, `gateway/`) and [`PROTOCOL.md`](./PROTOCOL.md). The `Chats/` folder is the accompanying agent history / task evidence.
+
+---
+
 ## Docs map
 
 | Doc | Contents |
 |---|---|
 | [`PROTOCOL.md`](./PROTOCOL.md) | Envelope, payloads, MQTT uplink rules |
+| [`Chats/`](./Chats/) | Agent chat artifacts, task-list screenshots, session release zips |
 | [`docs/screenshots/`](./docs/screenshots/) | Gateway UI screenshots used in this README |
 | [`worker/firmware/README.md`](./worker/firmware/README.md) | Worker pins, intervals, build |
 | [`gateway/README.md`](./gateway/README.md) | Gateway flash, provisioning, MQTT contract, LED meanings |
@@ -561,4 +613,4 @@ Possible later additions (not claimed as implemented here):
 
 ## License / hackathon note
 
-Built as an AI Hardware Hackathon MVP: two flashable firmwares, one shared protocol, local safety UX on the gateway, and an MQTT path ready for outside-mine alert clients.
+Built as an AI Hardware Hackathon MVP: two flashable firmwares, one shared protocol, local safety UX on the gateway, and an MQTT path ready for outside-mine alert clients. Agent chat history and completed task-list screenshots are archived under [`Chats/`](./Chats/).
