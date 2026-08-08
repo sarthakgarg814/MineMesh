@@ -26,6 +26,8 @@ The firmware uses `worker-001` and is serial-only until `APP_GATEWAY_MAC` in `fi
 
 Do not use ESP32-C3 GPIO 11–17; they are connected to flash.
 
+Connection diagrams: [`../../docs/wiring.md`](../../docs/wiring.md). Parts list: [`../../BOM.md`](../../BOM.md).
+
 ## Behavior
 
 Heartbeat is sent every 10 seconds and telemetry every 15 seconds. A two-second button hold sends manual SOS. Inactivity sends one SOS after 60 seconds without meaningful acceleration change and re-arms after movement. A fall spike starts a ten-second yellow countdown; a short button press cancels it, otherwise `FALL_ALERT` is sent. SOS is red, fall is yellow, gateway-connected is green blinking, and gateway-disconnected is red blinking. The MPU6050 is abstracted by the sensor read functions and sensor-derived alerts are suppressed when initialization fails.

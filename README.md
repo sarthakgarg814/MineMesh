@@ -78,9 +78,12 @@ MineMesh is intentionally built from low-cost, commodity parts and radio modes t
 ```text
 my_firmware/
 ├── PROTOCOL.md          # Shared MineMesh Protocol v1 (source of truth for packets)
+├── BOM.md               # Bill of materials (parts list, separate from this README)
 ├── README.md
 ├── Chats/               # Agent chat artifacts + task-list screenshots
-├── docs/screenshots/    # Gateway dashboard UI captures
+├── docs/
+│   ├── wiring.md        # Board ↔ sensor connection diagrams
+│   └── screenshots/     # Gateway dashboard UI captures
 ├── worker/              # Firmware 1 — end-device / wearable
 │   └── firmware/        # App logic, pins, ESP-NOW TX, sensors
 ├── gateway/             # Firmware 2 — ESP-NOW RX + local UI + optional MQTT bridge
@@ -131,7 +134,56 @@ ESP-IDF firmware for device id `worker-001` (configurable in `worker/firmware/co
 | Battery ADC (ADC1 CH0) | 0 |
 | On-board RGB LED (WS2812) | 8 |
 
-Avoid ESP32-C3 GPIO 11–17 (flash).
+Avoid ESP32-C3 GPIO 11–17 (flash). Full wiring diagrams: [`docs/wiring.md`](./docs/wiring.md). Parts list: [`BOM.md`](./BOM.md).
+
+### Board ↔ sensor wiring diagram
+
+How the worker ESP32-C3 connects to the MPU6050 and other peripherals:
+
+```mermaid
+flowchart TB
+  subgraph MCU["ESP32-C3 worker"]
+    G4["GPIO4 SDA"]
+    G5["GPIO5 SCL"]
+    G9["GPIO9 SOS in"]
+    G6["GPIO6 buzzer"]
+    G0["GPIO0 battery ADC"]
+    G8["GPIO8 RGB LED"]
+    PWR["3V3 / GND / USB"]
+  end
+
+  MPU["MPU6050<br/>VCC·GND·SDA·SCL<br/>AD0→GND → 0x68"]
+  BTN["SOS button"]
+  BUZ["Buzzer"]
+  BAT["Battery + divider"]
+
+  PWR --> MPU
+  G4 --> MPU
+  G5 --> MPU
+  G9 --> BTN
+  BTN --> GND1["GND"]
+  G6 --> BUZ
+  G0 --> BAT
+```
+
+```text
+ESP32-C3                MPU6050
+  3V3 ───────────────── VCC
+  GND ───────────────── GND
+  GPIO4 ─────────────── SDA
+  GPIO5 ─────────────── SCL
+                        AD0 → GND (address 0x68)
+
+ESP32-C3                Other parts
+  GPIO9 ── switch ──── GND          (SOS, active low)
+  GPIO6 ── buzzer ──── GND
+  GPIO0 ── divider ─── from BAT+    (keep ≤ 3.3 V at ADC)
+  GPIO8 ── on-board WS2812
+```
+
+Gateway needs **USB power only** (no MPU6050). Status LED = GPIO8, BOOT reset = GPIO9. See [`docs/wiring.md`](./docs/wiring.md) for gateway diagram and power-on checklist.
+
+**Bill of materials:** kept separately in [`BOM.md`](./BOM.md) (worker + gateway parts, qty, notes, rough cost).
 
 **Gateway peer config** (compile-time in `app_config.h`):
 
@@ -603,6 +655,8 @@ Source of truth for behavior remains the firmware trees (`worker/`, `gateway/`) 
 | Doc | Contents |
 |---|---|
 | [`PROTOCOL.md`](./PROTOCOL.md) | Envelope, payloads, MQTT uplink rules |
+| [`BOM.md`](./BOM.md) | Bill of materials — worker, gateway, shared bench parts |
+| [`docs/wiring.md`](./docs/wiring.md) | Board ↔ sensor / peripheral connection diagrams |
 | [`Chats/`](./Chats/) | Agent chat artifacts, task-list screenshots, session release zips |
 | [`docs/screenshots/`](./docs/screenshots/) | Gateway UI screenshots used in this README |
 | [`worker/firmware/README.md`](./worker/firmware/README.md) | Worker pins, intervals, build |
