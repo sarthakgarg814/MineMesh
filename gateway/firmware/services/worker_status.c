@@ -1,0 +1,12 @@
+#include "worker_status.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "esp_timer.h"
+#include "stdio.h"
+#include "string.h"
+#include "cJSON.h"
+static worker_status_t workers[WORKER_STATUS_MAX]; static SemaphoreHandle_t lock;
+static uint32_t now_ms(void){return (uint32_t)(esp_timer_get_time()/1000);}
+void worker_status_init(void){if(!lock)lock=xSemaphoreCreateMutex();memset(workers,0,sizeof(workers));}
+void worker_status_update(const char *id,const char *type,const char *priority,int rssi){if(!lock||!id||!id[0])return;uint32_t now=now_ms();if(xSemaphoreTake(lock,pdMS_TO_TICKS(20))!=pdTRUE)return;int found=-1,empty=-1,oldest=-1;uint32_t oldest_time=UINT32_MAX;for(int i=0;i<WORKER_STATUS_MAX;i++){if(!workers[i].source_id[0]&&empty<0)empty=i;if(!strcmp(workers[i].source_id,id))found=i;if(workers[i].source_id[0]&&!workers[i].online&&workers[i].last_seen_ms<oldest_time){oldest=i;oldest_time=workers[i].last_seen_ms;}}if(found<0)found=empty>=0?empty:oldest;if(found>=0){strlcpy(workers[found].source_id,id,sizeof(workers[found].source_id));strlcpy(workers[found].message_type,type,sizeof(workers[found].message_type));strlcpy(workers[found].priority,priority,sizeof(workers[found].priority));workers[found].rssi=rssi;workers[found].last_seen_ms=now;workers[found].online=true;}xSemaphoreGive(lock);}
+size_t worker_status_json(char *out,size_t capacity){if(!out||capacity<3)return 0;cJSON *root=cJSON_CreateObject();cJSON *list=cJSON_AddArrayToObject(root,"workers");uint32_t now=now_ms();int online=0,known=0;if(lock)xSemaphoreTake(lock,pdMS_TO_TICKS(50));for(int i=0;i<WORKER_STATUS_MAX;i++){if(!workers[i].source_id[0])continue;known++;bool is_online=(uint32_t)(now-workers[i].last_seen_ms)<WORKER_STATUS_ONLINE_MS;workers[i].online=is_online;if(is_online)online++;cJSON *item=cJSON_CreateObject();cJSON_AddStringToObject(item,"source_id",workers[i].source_id);cJSON_AddBoolToObject(item,"online",is_online);cJSON_AddNumberToObject(item,"last_seen_ms",(uint32_t)(now-workers[i].last_seen_ms));cJSON_AddStringToObject(item,"message_type",workers[i].message_type);cJSON_AddStringToObject(item,"priority",workers[i].priority);cJSON_AddNumberToObject(item,"rssi",workers[i].rssi);cJSON_AddItemToArray(list,item);}if(lock)xSemaphoreGive(lock);cJSON_AddNumberToObject(root,"online",online);cJSON_AddNumberToObject(root,"known",known);char *render=cJSON_PrintUnformatted(root);size_t n=render?strlen(render):0;if(n>=capacity)n=capacity-1;if(render)memcpy(out,render,n);out[n]='\0';free(render);cJSON_Delete(root);return n;}

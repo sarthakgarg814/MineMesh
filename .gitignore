@@ -1,0 +1,22 @@
+# ESP-IDF / firmware build outputs
+**/build/
+**/managed_components/
+**/sdkconfig
+**/sdkconfig.old
+**/.firmgen_sources
+*.bin
+*.elf
+*.map
+
+# Local tooling / caches
+**/.craftif/
+.venv/
+__pycache__/
+
+# Logs and OS noise
+*.log
+.DS_Store
+debug-*.log
+
+# Generated API docs (regenerate with Doxygen if needed)
+**/firmware/docs/api/

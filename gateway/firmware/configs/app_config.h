@@ -1,0 +1,17 @@
+#ifndef APP_CONFIG_H
+#define APP_CONFIG_H
+
+#define APP_GATEWAY_ID "gateway"
+#define APP_WORKER_ID "worker-001"
+#define APP_MQTT_TOPIC "minemesh/v1/uplink"
+#define APP_ESPNOW_CHANNEL 0
+#define APP_ESPNOW_MAX_PAYLOAD 250
+#define APP_RX_QUEUE_LENGTH 8
+#define APP_RETRY_QUEUE_LENGTH 8
+#define APP_DEDUP_HISTORY 64
+#define APP_JSON_MAX 250
+#define APP_STATUS_LED_GPIO 8
+#define APP_BOOT_BUTTON_GPIO 9
+#define APP_ESPNOW_TEST_CHANNEL 1
+
+#endif

@@ -1,0 +1,10 @@
+# Auto-generated defaults for the standard project layout.
+CONFIG_IDF_TARGET="esp32c3"
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+# Harvested from reference example (H1) — feature flags only, no design choices.
+CONFIG_BT_ENABLED=y
+CONFIG_BT_BLE_42_FEATURES_SUPPORTED=y
+# --- firmgen_telemetry (auto) ---
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_FREERTOS_RUN_TIME_STATS_USING_ESP_TIMER=y
